@@ -1,0 +1,89 @@
+# Template, where %key% is replaced to the corresponding value, if any
+# Available keys here: 
+# - %text% for current output, 
+# - %instr% for the repeated symbols as described below in [instrumental]
+template = '{"text":"%text%","instrumental":"%instr%"}'
+
+# Protocol to use to connect to the lrcsnc server, works the same way as in lrcsnc's config
+protocol = "unix" 
+
+# Path to the server, works the same way as in lrcsnc's config
+listen-at = "/tmp/lrcsnc-test.sock" 
+
+# This describes when the letter-by-letter animation should stop
+# revealing the current lyric
+# relative to the lyric duration in percents. 
+# Default: by 40% of the lyric duration
+in-stop-at = 40
+
+# This describes when the letter-by-letter animation should begin
+# removing the current lyric before the start of the next
+# relative to the lyric duration in percents. 
+# Default: at 90% of the lyric duration
+out-start-at = 90
+
+# The [instrumental] section describes the decorative thingie
+# that shows that the song is actually playing and not stopped.
+# While enabled, the number of symbols will cycle from 1 to max-symbols
+# at certain intervals, but only while the song is playing
+# Check the example at README for better understanding
+[instrumental]
+
+# self-explanatory
+enabled = true
+
+# the interval at which the symbols cycle works
+interval = 0.66 # in seconds
+
+# self-explanatory
+# doesn't need to be a single character btw
+symbol = "󰎇"
+
+# the maximum amount of symbols at once
+# once the amount goes to it, the next iteration cycles back to 1 symbol
+# so if it is 3, at most you will see "ZZZ" before it goes back to "Z"
+# where Z is your symbol of choice
+max-symbols = 3
+
+# The [errors] section describes how the various messages from lrcsnc
+# should be displayed. They are not written letter-by-letter.
+[errors]
+
+# This appears when nothing is playing
+not-playing = " Nothing is playing"
+
+# This appears when there's no lyrics at all for the song
+no-lyrics = "⨯ No lyrics!"
+
+# This appears when there's no synced lyrics for the song
+no-synced-lyrics = "󰦨 No synced lyrics!"
+
+# This appears while lyrics are loading for the song
+loading-lyrics = "󱥸 Loading..."
+
+# This is a generic error message for server-side errors.
+error-message = " An error occured!"
+
+# If the server goes offline, there is no reconnection mechanism implemented
+# so you'll have to restart the client as well
+server-offline = " The server is offline, you may want to restart everything manually"
+
+# The [multiplier] section describes the multiplier if you want to use it.
+# tbh it's really wonky and I've decided against using it myself, but it's here
+# even though I really don't recommend it
+[multiplier]
+
+# self-explanatory
+enabled = false 
+
+# format of the multiplier, where %value% is replaced 
+# by the amounts the lyric has repeated itself
+format = "x%value% " 
+
+# where to append the multiplier: 
+# - "text" for %text%'s value
+# - "instr" for %instr%'s value
+add-to = "instr"
+
+# appends to the left if true, to the right if false
+to-left = true

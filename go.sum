@@ -1,0 +1,6 @@
+github.com/Endg4meZer0/go-mpris v1.0.5 h1:a3FUGD/h3tQAFlcl/YH4TVwtI/NVm4UJAGMEyaKai7I=
+github.com/Endg4meZer0/go-mpris v1.0.5/go.mod h1:eh//AAqSR5XF4G2mAKe9NrSp5sH8G6f3RnYzbupi8tU=
+github.com/godbus/dbus/v5 v5.0.3 h1:ZqHaoEF7TBzh4jzPmqVhE/5A1z9of6orkAe5uHoAeME=
+github.com/godbus/dbus/v5 v5.0.3/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
+github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
+github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
