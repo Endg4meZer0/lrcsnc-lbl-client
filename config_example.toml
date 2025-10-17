@@ -8,7 +8,7 @@ template = '{"text":"%text%","instrumental":"%instr%"}'
 protocol = "unix" 
 
 # Path to the server, works the same way as in lrcsnc's config
-listen-at = "/tmp/lrcsnc-test.sock" 
+listen-at = "/tmp/lrcsnc.sock" 
 
 # This describes when the letter-by-letter animation should stop
 # revealing the current lyric
