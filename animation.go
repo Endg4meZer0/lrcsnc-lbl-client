@@ -62,6 +62,8 @@ func NewAnimation(ctx context.Context, canc func(), key AnimationType, source st
 	an.flow = flow
 	an.duration = duration
 
+	an.Finished = make(chan bool, 1)
+
 	return an
 }
 
@@ -74,11 +76,16 @@ func (an *Animation) Source() string {
 }
 
 func (an *Animation) Start() {
-	an.Finished = make(chan bool, 1)
 	runes := []rune(an.source)
+	stopAppearAt := GConfig.C.StopAppearAt
+	startDisappearAt := GConfig.C.StartDisappearAt
+	if an.key != AnimationTypeLyric {
+		stopAppearAt = 100
+		startDisappearAt = 0
+	}
 
 	if an.flow {
-		if GConfig.C.StopAppearAt == 0 || an.duration == 0 || len(runes) == 0 {
+		if stopAppearAt == 0 || an.duration == 0 || len(runes) == 0 {
 			an.index = len(runes)
 			an.writetxt()
 			an.Finished <- true
@@ -87,7 +94,7 @@ func (an *Animation) Start() {
 		}
 
 		// count the time between letters
-		timeBetweenLettersMs := int(math.Round((an.duration*float64(GConfig.C.StopAppearAt)/100)*1000/rate)) / len(runes)
+		timeBetweenLettersMs := int(math.Round((an.duration*float64(stopAppearAt)/100)*1000/rate)) / len(runes)
 		if timeBetweenLettersMs <= 0 {
 			an.index = len(runes)
 			an.writetxt()
@@ -132,7 +139,7 @@ func (an *Animation) Start() {
 			}
 		}
 	} else {
-		if GConfig.C.StartDisappearAt == 100 || an.duration == 0 || len(runes) == 0 {
+		if startDisappearAt == 100 || an.duration == 0 || len(runes) == 0 {
 			an.index = 0
 			an.writetxt()
 			an.Finished <- true
@@ -141,7 +148,7 @@ func (an *Animation) Start() {
 		}
 
 		// count time between letters
-		timeBetweenLettersMs := int(math.Round(((an.duration-0.1)-(an.duration-0.1)*float64(GConfig.C.StartDisappearAt)/100)*1000/rate)) / len(runes)
+		timeBetweenLettersMs := int(math.Round(((an.duration-0.1)-(an.duration-0.1)*float64(startDisappearAt)/100)*1000/rate)) / len(runes)
 		if timeBetweenLettersMs <= 0 {
 			an.index = 0
 			an.writetxt()
@@ -192,6 +199,17 @@ func (an *Animation) Start() {
 }
 
 func (an *Animation) writetxt() {
-	wd.data[string(an.key)] = string([]rune(an.source)[:an.index])
+	switch an.key {
+	case AnimationTypeLyric:
+		wd.fields.lyric = string([]rune(an.source)[:an.index])
+	case AnimationTypeTitle:
+		wd.fields.title = string([]rune(an.source)[:an.index])
+	case AnimationTypeArtist:
+		wd.fields.artist = string([]rune(an.source)[:an.index])
+	case AnimationTypeArtists:
+		wd.fields.artists = string([]rune(an.source)[:an.index])
+	case AnimationTypeAlbum:
+		wd.fields.album = string([]rune(an.source)[:an.index])
+	}
 	write()
 }

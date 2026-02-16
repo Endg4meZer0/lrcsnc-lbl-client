@@ -8,17 +8,24 @@ import (
 	"github.com/Endg4meZer0/go-mpris"
 )
 
+type writerFields struct {
+	lyric   string
+	title   string
+	artist  string
+	artists string
+	album   string
+	instr   string
+}
+
 type writerData struct {
 	overwrite    string
 	message      string
 	messageShown bool
 	status       Status
-	data         map[string]string
+	fields       writerFields
 }
 
-var wd writerData = writerData{
-	data: make(map[string]string),
-}
+var wd writerData
 var write func() = writer()
 
 var multiplier int
@@ -38,7 +45,7 @@ func initOutput() {
 					continue
 				}
 
-				wd.data["instr"] = strings.Repeat(GConfig.C.Instrumental.Symbol, i)
+				wd.fields.instr = strings.Repeat(GConfig.C.Instrumental.Symbol, i)
 				write()
 
 				i++
@@ -49,7 +56,7 @@ func initOutput() {
 		}()
 	} else {
 		instrTicker.Stop()
-		wd.data["instr"] = ""
+		wd.fields.instr = ""
 	}
 }
 
@@ -85,22 +92,22 @@ func writer() func() {
 					return strings.ReplaceAll(wd.message, "\"", "\\\"")
 				}
 
-				return strings.ReplaceAll(wd.data["lyric"], "\"", "\\\"")
+				return strings.ReplaceAll(wd.fields.lyric, "\"", "\\\"")
 			},
 			"title": func() string {
-				return strings.ReplaceAll(wd.data["title"], "\"", "\\\"")
+				return strings.ReplaceAll(wd.fields.title, "\"", "\\\"")
 			},
 			"artist": func() string {
-				return strings.ReplaceAll(wd.data["artist"], "\"", "\\\"")
+				return strings.ReplaceAll(wd.fields.artist, "\"", "\\\"")
 			},
 			"artists": func() string {
-				return strings.ReplaceAll(wd.data["artists"], "\"", "\\\"")
+				return strings.ReplaceAll(wd.fields.artists, "\"", "\\\"")
 			},
 			"album": func() string {
-				return strings.ReplaceAll(wd.data["album"], "\"", "\\\"")
+				return strings.ReplaceAll(wd.fields.album, "\"", "\\\"")
 			},
 			"instr": func() string {
-				return wd.data["instr"]
+				return wd.fields.instr
 			},
 			"player": func() string {
 				return playerName

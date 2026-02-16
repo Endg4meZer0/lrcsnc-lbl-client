@@ -63,11 +63,11 @@ disappear-on-switch = true
 # Fun fact: it's actually float64 internally, so if you're
 #   calculative enough, you can try some weird decimal values here.
 [info.animation-speed]
-# Default: 10 lps for everything.
-title = 10
-artist = 10
-artists = 10
-album = 10
+# Default: 15 lps for everything.
+title = 15
+artist = 15
+artists = 15
+album = 15
 
 # [info.always-switch] is about booleans that set 
 #   if the tag supposed to be using animation every time 
