@@ -21,7 +21,9 @@ const (
 	EventTypeLyricsStateChanged    EventType = "LyricsStateChanged"
 	EventTypeLyricsChanged         EventType = "LyricsChanged"
 	EventTypeOverwriteRequired     EventType = "OverwriteRequired"
+	EventTypeServerError           EventType = "ServerError"
 	EventTypeServerClosed          EventType = "ServerClosed"
+	EventTypeServerVersion         EventType = "ServerVersion"
 	EventTypeConfigReloaded        EventType = "ConfigReloaded" // only for client
 )
 
@@ -68,4 +70,8 @@ type EventTypeOverwriteRequiredData struct {
 	Overwrite string
 }
 
+type EventTypeServerErrorData struct{}
 type EventTypeServerClosedData struct{}
+type EventTypeServerVersionData struct {
+	Version string
+}

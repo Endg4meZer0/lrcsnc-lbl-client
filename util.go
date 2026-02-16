@@ -39,6 +39,7 @@ const (
 	StatusNotFound
 	StatusLoading
 	StatusError
+	StatusNotPlaying
 )
 
 func (s Status) String() string {
@@ -60,7 +61,7 @@ func (s Status) String() string {
 // of output/client module. It is a very simplified middle-ground between
 // strings.Replacer and a proper text/template.
 //
-// It is hardcoded to use curly brackets as start and end delimeters for keys.
+// It is hardcoded to use % as delimeters for keys.
 type DynamicReplacer struct {
 	m map[string]func() string
 }

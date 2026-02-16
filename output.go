@@ -2,66 +2,27 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Endg4meZer0/go-mpris"
 )
 
-type animated struct {
-	m          sync.Mutex
-	status     Status
-	index      int
-	full       string
-	inProgress bool
+type writerData struct {
+	overwrite    string
+	message      string
+	messageShown bool
+	status       Status
+	data         map[string]string
 }
 
-var text animated
-var instrumental string
+var wd writerData = writerData{
+	data: make(map[string]string),
+}
+var write func() = writer()
+
 var multiplier int
 var overwriteText string
-var dynrepl *DynamicReplacer = NewDynamicReplacer(
-	map[string]func() string{
-		"text": func() string {
-			out := ""
-
-			if text.status != StatusOK {
-				return text.status.String()
-			}
-
-			if !text.inProgress && text.index == 0 {
-				return ""
-			}
-
-			if text.inProgress {
-				out = string([]rune(text.full)[:text.index])
-			} else {
-				out = text.full
-			}
-
-			out = strings.ReplaceAll(out, "\"", "\\\"")
-
-			if GConfig.C.Multiplier.Enabled && GConfig.C.Multiplier.AddTo == "text" {
-				return addMultiplier(out)
-			} else {
-				return out
-			}
-		},
-		"instr": func() string {
-			out := instrumental
-			if GConfig.C.Multiplier.Enabled && GConfig.C.Multiplier.AddTo == "instr" {
-				return addMultiplier(out)
-			} else {
-				return out
-			}
-		},
-		"player": func() string {
-			return playerName
-		},
-	},
-)
 
 var instrTicker = time.NewTicker(5 * time.Minute)
 
@@ -77,7 +38,7 @@ func initOutput() {
 					continue
 				}
 
-				instrumental = strings.Repeat(GConfig.C.Instrumental.Symbol, i)
+				wd.data["instr"] = strings.Repeat(GConfig.C.Instrumental.Symbol, i)
 				write()
 
 				i++
@@ -88,81 +49,73 @@ func initOutput() {
 		}()
 	} else {
 		instrTicker.Stop()
-		instrumental = ""
+		wd.data["instr"] = ""
 	}
 }
 
-func overwrite(s string) {
-	text.full = s
-	text.inProgress = false
+func message(txt string) {
+	wd.message = txt
+	write()
+	go func() {
+		<-time.After(5 * time.Second)
+		wd.message = ""
+		wd.messageShown = false
+		write()
+	}()
 }
 
-func write() {
-	fmt.Println(dynrepl.Replace(GConfig.C.Template))
+func overwrite(txt string) {
+	wd.overwrite = txt
+	write()
 }
 
-func addMultiplier(s string) string {
-	if multiplier < 2 {
-		return s
-	}
+func writer() func() {
+	var dynrepl *DynamicReplacer = NewDynamicReplacer(
+		map[string]func() string{
+			"text": func() string {
+				if wd.overwrite != "" {
+					return strings.ReplaceAll(wd.overwrite, "\"", "\\\"")
+				}
 
-	if GConfig.C.Multiplier.ToLeft {
-		return strings.ReplaceAll(GConfig.C.Multiplier.Format, "%value%",
-			fmt.Sprintf("%v", multiplier)) + s
-	} else {
-		return s + strings.ReplaceAll(GConfig.C.Multiplier.Format, "%value%",
-			fmt.Sprintf("%v", multiplier))
-	}
-}
+				if wd.status != StatusOK {
+					return wd.status.String()
+				}
 
-func startCounting() {
-	txtRunes := []rune(text.full)
+				if wd.message != "" {
+					return strings.ReplaceAll(wd.message, "\"", "\\\"")
+				}
 
-	if text.index < len(txtRunes) {
-		if len(txtRunes) == 1 {
-			text.index = 1
-			text.inProgress = false
-			return
-		}
-		timeBetweenLettersMs := int(math.Round((timeLeft*float64(GConfig.C.InStopAt)/100)*1000/rate)) / (len(txtRunes) - text.index - 1)
-		if timeBetweenLettersMs <= 0 {
-			text.index = len(txtRunes)
-			text.inProgress = false
-			return
-		}
-		ticker := time.NewTicker(time.Duration(timeBetweenLettersMs) * time.Millisecond)
-		for range ticker.C {
-			text.index++
-			if text.index > len(txtRunes) || !text.inProgress {
-				text.index = len(txtRunes)
-				text.inProgress = false
-				break
-			}
-			write()
-		}
-		ticker.Stop()
-	} else {
-		if len(txtRunes) == 1 {
-			text.index = 0
-			text.inProgress = false
-			return
-		}
-		timeBetweenLettersMs := int(math.Round((timeLeft-timeLeft*float64(GConfig.C.OutStartAt)/100)*1000/rate)) / len(txtRunes)
-		if timeBetweenLettersMs <= 0 {
-			text.index = 0
-			text.inProgress = false
-			return
-		}
-		ticker := time.NewTicker(time.Duration(timeBetweenLettersMs) * time.Millisecond)
-		for range ticker.C {
-			text.index--
-			if text.index < 0 || !text.inProgress {
-				text.index = 0
-				text.inProgress = false
-				break
-			}
-			write()
-		}
-		ticker.Stop()
+				return strings.ReplaceAll(wd.data["lyric"], "\"", "\\\"")
+			},
+			"title": func() string {
+				return strings.ReplaceAll(wd.data["title"], "\"", "\\\"")
+			},
+			"artist": func() string {
+				return strings.ReplaceAll(wd.data["artist"], "\"", "\\\"")
+			},
+			"artists": func() string {
+				return strings.ReplaceAll(wd.data["artists"], "\"", "\\\"")
+			},
+			"album": func() string {
+				return strings.ReplaceAll(wd.data["album"], "\"", "\\\"")
+			},
+			"instr": func() string {
+				return wd.data["instr"]
+			},
+			"player": func() string {
+				return playerName
+			},
+			"multiplier": func() string {
+				if multiplier <= 1 {
+					return ""
+				}
+
+				return strings.ReplaceAll(GConfig.C.MultiplierTemplate, "%value%", fmt.Sprint(multiplier))
+			},
+		},
+	)
+
+	return func() {
+		fmt.Println(dynrepl.Replace(GConfig.C.Template))
 	}
 }
