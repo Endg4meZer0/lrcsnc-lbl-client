@@ -58,6 +58,8 @@ func NewAnimation(ctx context.Context, canc func(), key AnimationType, source st
 	an.index = 0
 	if startIndex != -1 {
 		an.index = startIndex
+	} else if !flow {
+		an.index = len([]rune(source))
 	}
 	an.flow = flow
 	an.duration = duration
@@ -73,6 +75,10 @@ func (an *Animation) Flow() AnimationFlow {
 
 func (an *Animation) Source() string {
 	return an.source
+}
+
+func (an *Animation) Index() int {
+	return an.index
 }
 
 func (an *Animation) Start() {
@@ -103,7 +109,7 @@ func (an *Animation) Start() {
 			return
 		}
 
-		an.index = 1
+		an.index++
 		an.writetxt()
 		if an.index > len(runes) {
 			an.Finished <- true
@@ -157,15 +163,12 @@ func (an *Animation) Start() {
 			return
 		}
 
-		an.index = len(runes) - 1
-		if an.index <= 0 {
-			an.index = 0
-			an.writetxt()
+		an.index--
+		an.writetxt()
+		if an.index < 1 {
 			an.Finished <- true
 			an.IsFinished = true
 			return
-		} else {
-			an.writetxt()
 		}
 
 		ticker := time.NewTicker(time.Duration(timeBetweenLettersMs) * time.Millisecond)

@@ -48,6 +48,7 @@ func (p *Planner) RequestAnimation(ad AnimationData) {
 		if ad.Value == "" && ad.Force {
 			if p.Lyric.A.Flow() {
 				l := p.Lyric.A.Source()
+				i := p.Lyric.A.Index()
 				if !p.Lyric.A.IsFinished {
 					p.Lyric.A.Cancel()
 				}
@@ -59,7 +60,7 @@ func (p *Planner) RequestAnimation(ad AnimationData) {
 					if t < ad.Time {
 						t = ad.Time - 0.1
 					}
-					p.Lyric.A = NewAnimation(ctx, canc, ad.Type, l, -1, AnimationFlowDisappear, t)
+					p.Lyric.A = NewAnimation(ctx, canc, ad.Type, l, i, AnimationFlowDisappear, t)
 					go p.Lyric.A.Start()
 				} else {
 					wd.fields.lyric = ""
