@@ -119,12 +119,11 @@ func (an *Animation) Start() {
 
 		ticker := time.NewTicker(time.Duration(timeBetweenLettersMs) * time.Millisecond)
 		defer ticker.Stop()
-	a:
-		for {
+		for !an.IsFinished {
 			select {
 			case <-ticker.C:
 				if an.IsFinished {
-					break a
+					break
 				}
 
 				an.index++
@@ -133,7 +132,7 @@ func (an *Animation) Start() {
 					an.writetxt()
 					an.Finished <- true
 					an.IsFinished = true
-					break a
+					break
 				}
 				an.writetxt()
 			case <-an.ctx.Done():
@@ -141,7 +140,6 @@ func (an *Animation) Start() {
 				an.writetxt()
 				an.Finished <- true
 				an.IsFinished = true
-				break a
 			}
 		}
 	} else {
@@ -173,12 +171,11 @@ func (an *Animation) Start() {
 
 		ticker := time.NewTicker(time.Duration(timeBetweenLettersMs) * time.Millisecond)
 		defer ticker.Stop()
-	b:
-		for {
+		for !an.IsFinished {
 			select {
 			case <-ticker.C:
 				if an.IsFinished {
-					break b
+					break
 				}
 
 				an.index--
@@ -187,7 +184,7 @@ func (an *Animation) Start() {
 					an.writetxt()
 					an.Finished <- true
 					an.IsFinished = true
-					break b
+					break
 				}
 				an.writetxt()
 			case <-an.ctx.Done():
@@ -195,7 +192,6 @@ func (an *Animation) Start() {
 				an.writetxt()
 				an.Finished <- true
 				an.IsFinished = true
-				break b
 			}
 		}
 	}
