@@ -88,7 +88,7 @@ func (p *Planner) RequestAnimation(ad AnimationData) {
 			go func() {
 				l := ad.Value
 				<-time.After(time.Duration(((float64(GConfig.C.StartDisappearAt)/100*ad.Time)*1000-100)/rate) * time.Millisecond)
-				if p.Lyric.A.Source() != l || !p.Lyric.A.Flow() {
+				if p.Lyric.A.Source() != l || !p.Lyric.A.IsFinished || !bool(p.Lyric.A.Flow()) {
 					return
 				}
 				<-p.Lyric.A.Finished
